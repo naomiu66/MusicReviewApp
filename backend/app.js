@@ -25,6 +25,7 @@ redis.connectRedis();
 
 const authRoutes = require("./routes/authRoutes");
 const musicRoutes = require("./routes/musicRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 const userRoutes = require("./routes/userRoutes");
 
 const app = express();
@@ -44,6 +45,7 @@ app.use(
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRoutes);
 app.use("/api/music", musicRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/users", userRoutes);
 
 module.exports = app;

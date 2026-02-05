@@ -1,12 +1,24 @@
+const ExternalApiError = require("../errors/ExternalApiError");
+
 const API_URL = process.env.LASTFM_API_URL;
 const API_KEY = process.env.LASTFM_API_KEY;
 
 const sendRequest = async (params) => {
   const response = await fetch(`${API_URL}/?${params}`);
   if (!response.ok) {
-    console.error("Failed to fetch data from Last Fm API", response.status);
+    const body = await response.text();
+
+    throw new ExternalApiError(
+      "Last.fm API request failed",
+      response.status,
+      body,
+    );
   }
   const data = await response.json();
+
+  if (data?.error) {
+    throw new ExternalApiError(`Last.fm API error: ${data.message}`, 502, data);
+  }
   return data;
 };
 
@@ -17,8 +29,8 @@ module.exports = {
       format: "json",
       api_key: API_KEY,
       album: query.album,
-      page: query.page,
-      limit: query.limit,
+      page: query.page ?? 1,
+      limit: query.limit ?? 30,
     });
     const response = await sendRequest(params);
     return response;
@@ -30,8 +42,8 @@ module.exports = {
       format: "json",
       api_key: API_KEY,
       track: query.track,
-      page: query.page,
-      limit: query.limit,
+      page: query.page ?? 1,
+      limit: query.limit ?? 30,
       artist: query.artist ?? "",
     });
     const response = await sendRequest(params);
@@ -58,7 +70,7 @@ module.exports = {
       format: "json",
       api_key: API_KEY,
       mbid: query.mbid,
-      album: query.track,
+      album: query.album,
       artist: query.artist,
       autocorrect: 1,
     });
@@ -72,8 +84,8 @@ module.exports = {
       format: "json",
       api_key: API_KEY,
       artist: query.artist,
-      page: query.page,
-      limit: query.limit,
+      page: query.page ?? 1,
+      limit: query.limit ?? 30,
     });
     const response = await sendRequest(params);
     return response;

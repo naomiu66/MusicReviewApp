@@ -1,3 +1,4 @@
+const ExternalApiError = require("../errors/ExternalApiError");
 const musicService = require("../services/musicService");
 
 module.exports = {
@@ -19,6 +20,12 @@ module.exports = {
 
       return res.json(data);
     } catch (err) {
+      if (err instanceof ExternalApiError) {
+        return res.status(502).json({
+          message: err.message,
+        });
+      }
+
       console.error("Failed to fetch tracks", err);
       return res.status(500).json({ message: "Internal server error" });
     }
@@ -32,13 +39,20 @@ module.exports = {
         artist: req.query.artist,
       };
       if ((!query.track || !query.artist) && !query.mbid) {
-        return res.status(400).json({ message: "Required params are not provided" });
+        return res
+          .status(400)
+          .json({ message: "Required params are not provided" });
       }
 
       const data = await musicService.getTrackInfo(query);
 
       return res.json(data);
     } catch (err) {
+      if (err instanceof ExternalApiError) {
+        return res.status(502).json({
+          message: err.message,
+        });
+      }
       console.error("Failed to fetch artists", err);
       return res.status(500).json({ message: "Internal server error" });
     }
@@ -60,6 +74,11 @@ module.exports = {
       const data = await musicService.getArtists(query);
       return res.json(data);
     } catch (err) {
+      if (err instanceof ExternalApiError) {
+        return res.status(502).json({
+          message: err.message,
+        });
+      }
       console.error("Failed to fetch artists", err);
       return res.status(500).json({ message: "Internal server error" });
     }
@@ -82,6 +101,11 @@ module.exports = {
 
       return data;
     } catch (err) {
+      if (err instanceof ExternalApiError) {
+        return res.status(502).json({
+          message: err.message,
+        });
+      }
       console.error("Failed to fetch albums", err);
       return res.status(500).json({ message: "Internal server error" });
     }
@@ -99,12 +123,19 @@ module.exports = {
       console.log(query);
 
       if ((!query.album || !query.artist) && !query.mbid)
-        return res.status(400).json({ message: "Required params are not provided" });
+        return res
+          .status(400)
+          .json({ message: "Required params are not provided" });
 
       const data = await musicService.getAlbumInfo(query);
 
       return data;
     } catch (err) {
+      if (err instanceof ExternalApiError) {
+        return res.status(502).json({
+          message: err.message,
+        });
+      }
       console.error("Failed to fetch albums", err);
       return res.status(500).json({ message: "Internal server error" });
     }
